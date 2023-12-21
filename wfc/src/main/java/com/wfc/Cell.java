@@ -1,7 +1,5 @@
 package com.wfc;
 
-import com.wfc.Main.Tiles;
-
 public class Cell {
     public int x, y;
     public boolean collapsed;

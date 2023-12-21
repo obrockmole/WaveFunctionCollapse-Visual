@@ -3,25 +3,20 @@ package com.wfc;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
-import com.wfc.Main.Tiles;
+import java.util.Comparator;
+import java.util.stream.Collectors;
 
 import javax.swing.*;
 
 public class WaveFunctionCollapse {
     public int width, height;
-    public Tiles[] tiles;
     public ArrayList<Cell> grid;
-
-    int iterations;
-
-    double startTime, endTime;
+    public int iterations;
 
     public WaveFunctionCollapse(int width, int height, Tiles[] tiles) {
         this.width = width;
         this.height = height;
-        this.tiles = tiles;
-
-        grid = new ArrayList<>();
+        this.grid = new ArrayList<>();
 
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
@@ -31,20 +26,18 @@ public class WaveFunctionCollapse {
     }
 
     public void start() {
-        startTime = System.currentTimeMillis();
-        
         checkLowestEntropy();
     }
 
     public void checkLowestEntropy() {
-        ArrayList<Cell> entropyGrid = new ArrayList<>();
-        for (Cell cell : grid) {
-            entropyGrid.add(cell);
-        }
+        ArrayList<Cell> entropyGrid = new ArrayList<>(grid);
 
         entropyGrid.removeIf(cell -> cell.collapsed || cell.possibleTiles.length == 1);
-        if (entropyGrid.size() == 0) return;
-        entropyGrid.sort((cell1, cell2) -> cell1.possibleTiles.length - cell2.possibleTiles.length);
+        if (entropyGrid.isEmpty()) {
+            iterations = width * height;
+            return;
+        }
+        entropyGrid.sort(Comparator.comparingInt(cell -> cell.possibleTiles.length));
 
         int lowestEntropy = entropyGrid.get(0).possibleTiles.length;
         entropyGrid.removeIf(cell -> cell.possibleTiles.length > lowestEntropy);
@@ -53,12 +46,35 @@ public class WaveFunctionCollapse {
     }
 
     public void collapseCells(ArrayList<Cell> entropyGrid) {
-        int randomCellIndex = (int)(Math.random() * entropyGrid.size());
-        Cell randomCell = entropyGrid.get(randomCellIndex);
-        Tiles randomTile = randomCell.possibleTiles[(int)(Math.random() * randomCell.possibleTiles.length)];
-        grid.get(randomCell.y * width + randomCell.x).collapse(randomTile);
+        Cell randomCell = entropyGrid.get((int) (Math.random() * entropyGrid.size()));
+        randomCell.collapse(randomCell.possibleTiles[(int) (Math.random() * randomCell.possibleTiles.length)]);
         updateEntropy();
     }
+
+
+    /*private void updateEntropy() {
+        for (Cell cell : grid) {
+            if (cell.collapsed) continue;
+
+            java.util.List<Tiles> validTileOptions = new ArrayList<>(Arrays.asList(Tiles.values()));
+            //For some reason possibleTiles length is 0 some times sooooooo idk
+            if (cell.y > 0) validTileOptions.retainAll(getViableTiles(grid.get((cell.y - 1) * width + cell.x).possibleTiles[0].tile.south));
+            if (cell.y < height - 1) validTileOptions.retainAll(getViableTiles(grid.get((cell.y + 1) * width + cell.x).possibleTiles[0].tile.north));
+            if (cell.x < width - 1) validTileOptions.retainAll(getViableTiles(grid.get(cell.y * width + (cell.x + 1)).possibleTiles[0].tile.west));
+            if (cell.x > 0) validTileOptions.retainAll(getViableTiles(grid.get(cell.y * width + (cell.x - 1)).possibleTiles[0].tile.east));
+
+            //Dis is why its the length is 0 cuz it likes to be funny and generate so there are no valid tile options
+            cell.setPossibleTiles(validTileOptions.toArray(new Tiles[0]));
+            if (cell.possibleTiles.length == 1) cell.collapse(validTileOptions.get(0));
+        }
+        iterations++;
+    }
+
+    private List<Tiles> getViableTiles(int[] viableTilesInt) {
+        return Arrays.stream(viableTilesInt)
+                .mapToObj(tile -> Tiles.values()[tile])
+                .collect(Collectors.toList());
+    }*/
 
     public void updateEntropy() {
         ArrayList<Cell> newGrid = new ArrayList<>(grid);
@@ -139,101 +155,36 @@ public class WaveFunctionCollapse {
         grid.clear();
         grid.addAll(newGrid);
         iterations++;
-
-        if (iterations < width * height) {
-            checkLowestEntropy();
-        }
-
-        endTime = System.currentTimeMillis();
-    }
-
-    public void removeSingles() {
-        ArrayList<Cell> newGrid = new ArrayList<>(grid);
-
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                int index = y * width + x;
-                Cell currentCell = newGrid.get(index);
-                Cell northCell = null, southCell = null, eastCell = null, westCell = null;
-
-                if (y > 0) northCell = newGrid.get((y - 1) * width + x);
-                if (y < height - 1) southCell = newGrid.get((y + 1) * width + x);
-                if (x > 0) westCell = newGrid.get(y * width + (x - 1));
-                if (x < width - 1) eastCell = newGrid.get(y * width + (x + 1));
-
-                if (northCell != null && southCell != null && eastCell != null && westCell != null) {
-                    Tiles commonTile = northCell.possibleTiles[0];
-                    if (commonTile == southCell.possibleTiles[0] && commonTile == eastCell.possibleTiles[0] && commonTile == westCell.possibleTiles[0]) {
-                        currentCell.collapse(commonTile);
-                    }
-                } else {
-                    Cell[] cells = {northCell, southCell, eastCell, westCell};
-                    Tiles commonTile = null;
-                    boolean allSame = true;
-
-                    for (Cell cell : cells) {
-                        if (cell != null) {
-                            if (commonTile == null) {
-                                commonTile = cell.possibleTiles[0];
-                            } else if (commonTile != cell.possibleTiles[0]) {
-                                allSame = false;
-                                break;
-                            }
-                        }
-                    }
-
-                    if (allSame && commonTile != null) {
-                        currentCell.collapse(commonTile);
-                    }
-                }
-            }
-        }
-
-        grid.clear();
-        grid.addAll(newGrid);
-    }
-
-    public void smooth(int amount) {
-        //Function to smooth out the generation, create bigger pockets, and remove small pockets
-
     }
 
     public void printGrid() {
-        String output = "";
+        StringBuilder output = new StringBuilder();
 
-        for (int i = 0; i < grid.size(); i++) {
-            if (i % width == 0) {
-                output += "\n";
-            }
+        for (Cell cell : grid) {
+            output.append(cell.collapsed ? cell.possibleTiles[0].index : "X").append(" ");
 
-            if (grid.get(i).collapsed)
-                output += grid.get(i).possibleTiles[0].tile.textColor + "█" + "\u001B[0m";
-            else
-                output += "\u001B[30m█\u001B[0m";
+            if (cell.x == width - 1)
+                output.append("\n");
         }
 
         System.out.println(output);
-        System.out.println("Time taken: " + (endTime - startTime) + "ms");
     }
 
     public void displayGrid() {
         JFrame frame = new JFrame("Wave Function Collapse");
+        frame.setLayout(new GridLayout(height, width));
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setResizable(false);
 
         for (Cell cell : grid) {
-            JPanel cellPanel = new JPanel();
+            JLabel cellPanel = new JLabel(new ImageIcon(cell.possibleTiles[0].tile.image));
             cellPanel.setSize(20, 20);
             cellPanel.setLocation(cell.x * 20, cell.y * 20);
-            cellPanel.setBackground(cell.possibleTiles[0].tile.color);
             frame.add(cellPanel);
         }
 
         frame.pack();
-        Insets insets = frame.getInsets();
-        frame.setSize(new Dimension(width * 20 + insets.left + insets.right, height * 20 + insets.top + insets.bottom));
-
-        frame.revalidate();
+        frame.setSize(new Dimension(width * 20 + frame.getInsets().left + frame.getInsets().right, height * 20 + frame.getInsets().top + frame.getInsets().bottom));
         frame.setVisible(true);
     }
 }
