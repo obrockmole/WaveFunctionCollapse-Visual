@@ -52,6 +52,7 @@ public class WaveFunctionCollapse {
     public void collapseCells(ArrayList<Cell> entropyGrid) {
         Cell randomCell = entropyGrid.get((int) (Math.random() * entropyGrid.size()));
         randomCell.collapse(randomCell.possibleTiles[(int) (Math.random() * randomCell.possibleTiles.length)]);
+        System.out.println("Collapsed cell at (" + randomCell.x + ", " + randomCell.y + ") to " + randomCell.possibleTiles[0].index);
         updateEntropy();
     }
 
@@ -69,7 +70,8 @@ public class WaveFunctionCollapse {
                 }
                 cell.setPossibleTiles(validTileOptions.toArray(new Tiles[0]));
                 if (cell.possibleTiles.length == 1) {
-                    cell.collapse(validTileOptions.get(0));
+                    cell.collapse(validTileOptions.getFirst());
+                    updateEntropy();
                 }
             }
         }

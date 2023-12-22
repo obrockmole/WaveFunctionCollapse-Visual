@@ -22,10 +22,19 @@ public class Main {
 
     private static JFrame createFrame() {
         JFrame frame = new JFrame("Wave Function Collapse");
-        frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setResizable(false);
         frame.pack();
         frame.setSize(new Dimension(wfc.width * 20 + frame.getInsets().left + frame.getInsets().right, wfc.height * 20 + frame.getInsets().top + frame.getInsets().bottom));
+        frame.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                if (evt.getKeyCode() == 32) {
+                    wfc = new WaveFunctionCollapse(30, 20, Tiles.values());
+                    wfc.start();
+                    complete = false;
+                }
+            }
+        });
         return frame;
     }
 
