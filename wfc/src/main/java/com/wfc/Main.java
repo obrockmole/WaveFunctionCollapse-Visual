@@ -10,7 +10,7 @@ public class Main {
     static boolean complete = false;
 
     public static void main(String[] args) {
-        wfc = new WaveFunctionCollapse(40, 30, Tiles.values());
+        wfc = new WaveFunctionCollapse(30, 20, Tiles.values());
         wfc.start();
 
         JFrame frame = createFrame();
@@ -26,12 +26,6 @@ public class Main {
         frame.setResizable(false);
         frame.pack();
         frame.setSize(new Dimension(wfc.width * 20 + frame.getInsets().left + frame.getInsets().right, wfc.height * 20 + frame.getInsets().top + frame.getInsets().bottom));
-        /*frame.addWindowListener(new WindowAdapter() {
-            public void windowClosing(WindowEvent event) {
-                wfc.printGrid();
-                wfc.displayGrid();
-            }
-        });*/
         return frame;
     }
 
