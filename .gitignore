@@ -2,3 +2,4 @@
 *.class
 *.xml
 *.iml
+/wfc/src/main/generations/

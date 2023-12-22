@@ -1,11 +1,18 @@
 package com.wfc;
 
 import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.stream.Collectors;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 
 public class WaveFunctionCollapse {
@@ -144,5 +151,40 @@ public class WaveFunctionCollapse {
         frame.pack();
         frame.setSize(new Dimension(width * 20 + frame.getInsets().left + frame.getInsets().right, height * 20 + frame.getInsets().top + frame.getInsets().bottom));
         frame.setVisible(true);
+    }
+
+    public void saveGrid(String directory) {
+        directory += LocalDateTime.now().format(DateTimeFormatter.ofPattern("MM_dd_yyyy_HH-mm")) + "/";
+        new File(directory).mkdirs();
+        String fileName = directory + "wfc_" + width + "x_" + height + "y";
+
+        try (FileWriter writer = new FileWriter(fileName + ".txt")) {
+            for (Cell cell : grid) {
+                writer.write(String.valueOf(cell.collapsed ? cell.possibleTiles[0].index : "X"));
+                writer.write(" ");
+                if (cell.x == width - 1)
+                    writer.write("\n");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        BufferedImage image = new BufferedImage(width * 20, height * 20, BufferedImage.TYPE_INT_RGB);
+        Graphics g = image.getGraphics();
+        for (Cell cell : grid) {
+            try {
+                BufferedImage tileImage = ImageIO.read(new File(cell.possibleTiles[0].tile.image));
+                g.drawImage(tileImage, cell.x * 20, cell.y * 20, null);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        g.dispose();
+
+        try {
+            ImageIO.write(image, "png", new File(fileName + ".png"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

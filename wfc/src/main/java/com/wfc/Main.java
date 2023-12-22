@@ -2,15 +2,17 @@ package com.wfc;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 
 public class Main {
     static WaveFunctionCollapse wfc;
     static boolean complete = false;
+    static int WIDTH = 20;
+    static int HEIGHT = 15;
 
     public static void main(String[] args) {
-        wfc = new WaveFunctionCollapse(30, 20, Tiles.values());
+        wfc = new WaveFunctionCollapse(WIDTH, HEIGHT, Tiles.values());
         wfc.start();
 
         JFrame frame = createFrame();
@@ -24,16 +26,16 @@ public class Main {
         JFrame frame = new JFrame("Wave Function Collapse");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setResizable(false);
-        frame.setLayout(new GridLayout(wfc.height, wfc.width));
+        frame.setLayout(new GridLayout(HEIGHT, WIDTH));
         frame.pack();
-        frame.setSize(new Dimension(wfc.width * 20 + frame.getInsets().left + frame.getInsets().right, wfc.height * 20 + frame.getInsets().top + frame.getInsets().bottom));
-        frame.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyPressed(java.awt.event.KeyEvent evt) {
-            if (evt.getKeyCode() == 32) {
-                wfc = new WaveFunctionCollapse(30, 20, Tiles.values());
-                wfc.start();
-                complete = false;
-            }
+        frame.setSize(new Dimension(WIDTH * 20 + frame.getInsets().left + frame.getInsets().right, HEIGHT * 20 + frame.getInsets().top + frame.getInsets().bottom));
+        frame.addKeyListener(new KeyAdapter() {
+            public void keyPressed(KeyEvent evt) {
+                if (evt.getKeyCode() == 32) {
+                    wfc = new WaveFunctionCollapse(WIDTH, HEIGHT, Tiles.values());
+                    wfc.start();
+                    complete = false;
+                }
             }
         });
         return frame;
@@ -45,6 +47,7 @@ public class Main {
                 update(frame);
                 if (complete) {
                     wfc.printGrid();
+                    wfc.saveGrid("wfc/src/main/generations/");
 
                     frame.getContentPane().removeAll();
                     for (Cell cell : wfc.grid) {
@@ -55,7 +58,7 @@ public class Main {
                     }
 
                     frame.pack();
-                    frame.setSize(new Dimension(wfc.width * 20 + frame.getInsets().left + frame.getInsets().right, wfc.height * 20 + frame.getInsets().top + frame.getInsets().bottom));
+                    frame.setSize(new Dimension(WIDTH * 20 + frame.getInsets().left + frame.getInsets().right, HEIGHT * 20 + frame.getInsets().top + frame.getInsets().bottom));
                 }
             }
         });
