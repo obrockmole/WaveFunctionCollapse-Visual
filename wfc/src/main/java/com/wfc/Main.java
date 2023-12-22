@@ -24,15 +24,16 @@ public class Main {
         JFrame frame = new JFrame("Wave Function Collapse");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setResizable(false);
+        frame.setLayout(new GridLayout(wfc.height, wfc.width));
         frame.pack();
         frame.setSize(new Dimension(wfc.width * 20 + frame.getInsets().left + frame.getInsets().right, wfc.height * 20 + frame.getInsets().top + frame.getInsets().bottom));
         frame.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyPressed(java.awt.event.KeyEvent evt) {
-                if (evt.getKeyCode() == 32) {
-                    wfc = new WaveFunctionCollapse(30, 20, Tiles.values());
-                    wfc.start();
-                    complete = false;
-                }
+            if (evt.getKeyCode() == 32) {
+                wfc = new WaveFunctionCollapse(30, 20, Tiles.values());
+                wfc.start();
+                complete = false;
+            }
             }
         });
         return frame;
@@ -43,9 +44,18 @@ public class Main {
             if (!complete) {
                 update(frame);
                 if (complete) {
-                    frame.dispose();
                     wfc.printGrid();
-                    wfc.displayGrid();
+
+                    frame.getContentPane().removeAll();
+                    for (Cell cell : wfc.grid) {
+                        JLabel cellPanel = new JLabel(new ImageIcon(cell.possibleTiles[0].tile.image));
+                        cellPanel.setSize(20, 20);
+                        cellPanel.setLocation(cell.x * 20, cell.y * 20);
+                        frame.add(cellPanel);
+                    }
+
+                    frame.pack();
+                    frame.setSize(new Dimension(wfc.width * 20 + frame.getInsets().left + frame.getInsets().right, wfc.height * 20 + frame.getInsets().top + frame.getInsets().bottom));
                 }
             }
         });

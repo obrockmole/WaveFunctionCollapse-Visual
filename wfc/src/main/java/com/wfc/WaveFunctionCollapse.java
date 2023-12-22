@@ -52,7 +52,6 @@ public class WaveFunctionCollapse {
     public void collapseCells(ArrayList<Cell> entropyGrid) {
         Cell randomCell = entropyGrid.get((int) (Math.random() * entropyGrid.size()));
         randomCell.collapse(randomCell.possibleTiles[(int) (Math.random() * randomCell.possibleTiles.length)]);
-        System.out.println("Collapsed cell at (" + randomCell.x + ", " + randomCell.y + ") to " + randomCell.possibleTiles[0].index);
         updateEntropy();
     }
 
