@@ -1,9 +1,9 @@
-package com.wfc;
+package org.wfc;
 
 public class Cell {
-    public int x, y;
-    public boolean collapsed;
-    public Tiles[] possibleTiles;
+    private int x, y;
+    private Tiles[] possibleTiles;
+    private boolean collapsed;
 
     public Cell(int x, int y, Tiles[] possibleTiles, boolean collapsed) {
         this.x = x;
@@ -12,8 +12,24 @@ public class Cell {
         this.collapsed = collapsed;
     }
 
+    public int getX() {
+        return x;
+    }
+
+    public int getY() {
+        return y;
+    }
+
+    public Tiles[] getPossibleTiles() {
+        return possibleTiles;
+    }
+
     public void setPossibleTiles(Tiles[] possibleTiles) {
         this.possibleTiles = possibleTiles;
+    }
+
+    public boolean isCollapsed() {
+        return collapsed;
     }
 
     public void collapse(Tiles tile) {
