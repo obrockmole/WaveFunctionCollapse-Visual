@@ -140,6 +140,15 @@ public class WaveFunctionCollapse {
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
+    public boolean isComplete() {
+        for (Cell cell : grid) {
+            if (!cell.isCollapsed()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public void printGrid() {
         StringBuilder output = new StringBuilder();
 

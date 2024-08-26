@@ -7,7 +7,6 @@ import java.awt.event.KeyEvent;
 
 public class Main {
     static WaveFunctionCollapse wfc;
-    static boolean complete = false;
     static int WIDTH = 20; //Number of tiles in the X direction
     static int HEIGHT = 15; //Number of tiles in the Y direction
     static int IMAGE_SIZE = 20; //Size of the image used for each tile in pixels
@@ -19,40 +18,19 @@ public class Main {
         JFrame frame = createFrame();
         frame.setVisible(true);
 
-        Timer timer = createTimer(frame);
-        timer.start();
-
-        while (wfc.getIterations() < wfc.getWidth() * wfc.getHeight()) {}
-        timer.stop();
-
-        wfc.printGrid();
-        wfc.saveGrid("src/main/generations/");
+        GUIWorker worker = new GUIWorker(wfc, frame);
+        worker.execute();
     }
 
     private static JFrame createFrame() {
         JFrame frame = new JFrame("Wave Function Collapse");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setResizable(false);
         frame.setLayout(new GridLayout(HEIGHT, WIDTH));
+        frame.setResizable(false);
         frame.pack();
         frame.setSize(new Dimension(WIDTH * IMAGE_SIZE + frame.getInsets().left + frame.getInsets().right, HEIGHT * IMAGE_SIZE + frame.getInsets().top + frame.getInsets().bottom));
-        frame.addKeyListener(new KeyAdapter() {
-            public void keyPressed(KeyEvent evt) {
-                if (evt.getKeyCode() == 32) {
-                    wfc = new WaveFunctionCollapse(WIDTH, HEIGHT, Tiles.values());
-                    wfc.start();
-                    complete = false;
-                }
-            }
-        });
-        return frame;
-    }
 
-    private static Timer createTimer(JFrame frame) {
-        return new Timer(15, e -> {
-            wfc.checkLowestEntropy();
-            displayGrid(frame);
-        });
+        return frame;
     }
 
     private static void displayGrid(JFrame frame) {
