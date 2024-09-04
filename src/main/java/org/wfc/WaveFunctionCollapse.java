@@ -9,16 +9,16 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.stream.Collectors;
 
 import javax.imageio.ImageIO;
-import javax.swing.*;
 
 public class WaveFunctionCollapse {
-    private int width, height;
+    private final int width, height;
     private int iterations;
-    private ArrayList<Cell> grid;
+    private final ArrayList<Cell> grid;
 
     private enum Direction {
         NORTH, SOUTH, EAST, WEST
@@ -66,7 +66,7 @@ public class WaveFunctionCollapse {
         }
 
         entropyGrid.sort(Comparator.comparingInt(cell -> cell.getPossibleTiles().length));
-        entropyGrid.removeIf(cell -> cell.getPossibleTiles().length > entropyGrid.get(0).getPossibleTiles().length);
+        entropyGrid.removeIf(cell -> cell.getPossibleTiles().length > entropyGrid.getFirst().getPossibleTiles().length);
 
         collapseCells(entropyGrid);
     }
@@ -129,10 +129,10 @@ public class WaveFunctionCollapse {
 
     private ArrayList<Tiles> getViableTiles(Cell cell, Direction direction) {
         int[] viableTilesInt = switch (direction) {
-            case NORTH -> cell.getPossibleTiles()[0].getTile().getSouth();
-            case SOUTH -> cell.getPossibleTiles()[0].getTile().getNorth();
-            case EAST -> cell.getPossibleTiles()[0].getTile().getWest();
-            case WEST -> cell.getPossibleTiles()[0].getTile().getEast();
+            case NORTH -> cell.getPossibleTiles()[0].getTile().south();
+            case SOUTH -> cell.getPossibleTiles()[0].getTile().north();
+            case EAST -> cell.getPossibleTiles()[0].getTile().west();
+            case WEST -> cell.getPossibleTiles()[0].getTile().east();
         };
 
         return Arrays.stream(viableTilesInt)
@@ -162,38 +162,53 @@ public class WaveFunctionCollapse {
         System.out.println(output);
     }
 
-    public void saveGrid(String directory) {
+    public void saveGridText(String directory) {
         directory += LocalDateTime.now().format(DateTimeFormatter.ofPattern("MM_dd_yyyy_HH-mm")) + "/";
-        new File(directory).mkdirs();
-        String fileName = directory + "wfc_" + width + "x_" + height + "y";
 
-        try (FileWriter writer = new FileWriter(fileName + ".txt")) {
-            for (Cell cell : grid) {
-                writer.write(String.valueOf(cell.isCollapsed() ? cell.getPossibleTiles()[0].getIndex() : "X"));
-                writer.write(" ");
-                if (cell.getX() == width - 1)
-                    writer.write("\n");
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        if (new File(directory).mkdir()) {
+            String fileName = directory + "wfc_" + width + "x_" + height + "y";
 
-        BufferedImage image = new BufferedImage(width * 20, height * 20, BufferedImage.TYPE_INT_RGB);
-        Graphics g = image.getGraphics();
-        for (Cell cell : grid) {
-            try {
-                BufferedImage tileImage = ImageIO.read(new File(cell.getPossibleTiles()[0].getTile().getImage()));
-                g.drawImage(tileImage, cell.getX() * 20, cell.getY() * 20, null);
+            try (FileWriter writer = new FileWriter(fileName + ".txt")) {
+                for (Cell cell : grid) {
+                    writer.write(String.valueOf(cell.isCollapsed() ? cell.getPossibleTiles()[0].getIndex() : "X"));
+                    writer.write(" ");
+                    if (cell.getX() == width - 1)
+                        writer.write("\n");
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        }
-        g.dispose();
 
-        try {
-            ImageIO.write(image, "png", new File(fileName + ".png"));
-        } catch (IOException e) {
-            e.printStackTrace();
+        } else {
+            System.out.println("Failed to save grid text, directory could not be created.");
+        }
+    }
+
+    public void saveGridImage(String directory) {
+        directory += LocalDateTime.now().format(DateTimeFormatter.ofPattern("MM_dd_yyyy_HH-mm")) + "/";
+        if (new File(directory).mkdirs()) {
+            String fileName = directory + "wfc_" + width + "x_" + height + "y";
+
+            BufferedImage image = new BufferedImage(width * Main.IMAGE_SIZE, height * Main.IMAGE_SIZE, BufferedImage.TYPE_INT_RGB);
+            Graphics g = image.getGraphics();
+            for (Cell cell : grid) {
+                try {
+                    BufferedImage tileImage = ImageIO.read(new File(cell.getPossibleTiles()[0].getTile().image()));
+                    g.drawImage(tileImage, cell.getX() * Main.IMAGE_SIZE, cell.getY() * Main.IMAGE_SIZE, null);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            g.dispose();
+
+            try {
+                ImageIO.write(image, "png", new File(fileName + ".png"));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        } else {
+            System.out.println("Failed to save grid image, directory could not be created.");
         }
     }
 }

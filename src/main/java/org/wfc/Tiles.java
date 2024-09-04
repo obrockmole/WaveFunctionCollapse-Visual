@@ -1,6 +1,6 @@
 package org.wfc;
 
-enum Tiles {
+public enum Tiles {
     //No connections
     BLANK(new Tile("Blank.png", new int[]{0, 4, 6, 7}, new int[]{0, 2, 3, 4}, new int[]{0, 3, 5, 7}, new int[]{0, 2, 5, 6}), 0), //Index 0
     //Connection on all 4 sides

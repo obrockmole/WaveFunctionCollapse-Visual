@@ -1,12 +1,13 @@
 package org.wfc;
 
 import javax.swing.*;
+import java.awt.*;
 import java.util.List;
 
 public class GUIWorker extends SwingWorker<Void, Cell[]> {
     private final WaveFunctionCollapse wfc;
     private final JFrame frame;
-    private static final int DELAY = 8; // Delay in milliseconds between each cell collapse
+    private static final int DELAY = 50; // Delay in milliseconds between each cell collapse
 
     public GUIWorker(WaveFunctionCollapse wfc, JFrame frame) {
         this.wfc = wfc;
@@ -25,6 +26,7 @@ public class GUIWorker extends SwingWorker<Void, Cell[]> {
                 e.printStackTrace();
             }
         }
+
         return null;
     }
 
@@ -37,17 +39,37 @@ public class GUIWorker extends SwingWorker<Void, Cell[]> {
     @Override
     protected void done() {
         wfc.printGrid();
-        wfc.saveGrid("src/main/generations/");
+//        wfc.saveGridText("src/main/generations/");
+//        wfc.saveGridImage("src/main/generations/");
+    }
+
+    private JPanel displayPossibleTiles(Cell cell) {
+        JPanel cellPanel = new JPanel(new GridLayout(3, 3));
+        cellPanel.setSize(Main.IMAGE_SIZE, Main.IMAGE_SIZE);
+        cellPanel.setLocation(cell.getX() * Main.IMAGE_SIZE, cell.getY() * Main.IMAGE_SIZE);
+        cellPanel.setBackground(new Color(200 / cell.getPossibleTiles().length, 15 * cell.getPossibleTiles().length, 0));
+
+        for (Tiles tile : cell.getPossibleTiles()) {
+            JLabel tilePanel = new JLabel(new ImageIcon(tile.getTile().image()));
+            cellPanel.add(tilePanel);
+        }
+
+        return cellPanel;
     }
 
     private void displayGrid(Cell[] grid) {
         frame.getContentPane().removeAll();
 
         for (Cell cell : grid) {
-            JLabel cellPanel = new JLabel(new ImageIcon(cell.isCollapsed() ? cell.getPossibleTiles()[0].getTile().getImage() : ""));
-            cellPanel.setSize(Main.IMAGE_SIZE, Main.IMAGE_SIZE);
-            cellPanel.setLocation(cell.getX() * Main.IMAGE_SIZE, cell.getY() * Main.IMAGE_SIZE);
-            frame.add(cellPanel);
+            if (cell.isCollapsed()) {
+                JLabel cellPanel = new JLabel(new ImageIcon(cell.getPossibleTiles()[0].getTile().image()));
+                cellPanel.setSize(Main.IMAGE_SIZE, Main.IMAGE_SIZE);
+                cellPanel.setLocation(cell.getX() * Main.IMAGE_SIZE, cell.getY() * Main.IMAGE_SIZE);
+                frame.add(cellPanel);
+
+            } else {
+                frame.add(displayPossibleTiles(cell));
+            }
         }
 
         frame.revalidate();

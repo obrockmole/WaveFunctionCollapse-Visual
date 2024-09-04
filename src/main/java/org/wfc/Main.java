@@ -2,8 +2,6 @@ package org.wfc;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
 
 public class Main {
     static WaveFunctionCollapse wfc;
@@ -27,23 +25,8 @@ public class Main {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLayout(new GridLayout(HEIGHT, WIDTH));
         frame.setResizable(false);
-        frame.pack();
         frame.setSize(new Dimension(WIDTH * IMAGE_SIZE + frame.getInsets().left + frame.getInsets().right, HEIGHT * IMAGE_SIZE + frame.getInsets().top + frame.getInsets().bottom));
 
         return frame;
-    }
-
-    private static void displayGrid(JFrame frame) {
-        frame.getContentPane().removeAll();
-
-        for (Cell cell : wfc.getGrid()) {
-            JLabel cellPanel = new JLabel(new ImageIcon(cell.isCollapsed() ? cell.getPossibleTiles()[0].getTile().getImage() : ""));
-            cellPanel.setSize(IMAGE_SIZE, IMAGE_SIZE);
-            cellPanel.setLocation(cell.getX() * IMAGE_SIZE, cell.getY() * IMAGE_SIZE);
-            frame.add(cellPanel);
-        }
-
-        frame.revalidate();
-        frame.repaint();
     }
 }

@@ -1,7 +1,7 @@
 package org.wfc;
 
 public class Cell {
-    private int x, y;
+    private final int x, y;
     private Tiles[] possibleTiles;
     private boolean collapsed;
 
